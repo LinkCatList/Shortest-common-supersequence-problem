@@ -1,124 +1,171 @@
+// #pragma GCC optimize("O3")
+// #pragma GCC target("avx2")
 #include <bits/stdc++.h>
+// #include <x86intrin.h>
+// #include <ext/pb_ds/assoc_container.hpp>
+// #include <ext/pb_ds/t_policy.hpp>
 using namespace std;
+// using namespace __gnu_pbds;
+// template <typename type, typename cmp = less<type>>
+// using pbds_set = t<type, null_type, cmp, rb_t_tag,
+// t_order_statistics_node_update>;
 typedef long long ll;
+typedef long double ld;
 typedef unsigned long long ull;
 // (づ°ω°)づﾐe★゜・。。・゜゜・。。・゜☆゜・。。・゜゜・。。・゜
-const int K = 20;
-const int inf = 2e9;
+const ll K = 460;
+const ll inf = 2e9;
+const ll big_num = 2e18;
 string abc = "abcdefghijklmnopqrstuvwxyz";
-vector<ll> z_function(string s) {
-  ll n = s.size();
-  vector<ll> z(n, 0);
-  ll l = 0, r = 0;
-  for (ll i = 1; i < n; i++) {
-    if (i <= r) {
-      z[i] = min(r - i, z[i - l]);
+const ll LG = 31;
+const int mod = 1e9 + 7;
+// mt19937 rnd(std::chrono::steady_clock::now().time_since_epoch().count());
+
+class CompressDna{
+public:
+  CompressDna(vector<string> &DnaCodes, int n){
+    this->Dna.resize(n);
+    this->DnaSize = n;
+    for(int i = 0; i<n; i++){
+      this->Dna[i] = DnaCodes[i];
     }
-    while (i + z[i] < n && s[z[i]] == s[i + z[i]]) {
-      z[i]++;
+    random_shuffle(this->Dna.begin(), this->Dna.end());
+    for(int i = 0; i<this->DnaSize; i++){
+      MatchUsed[this->Dna[i]] = false;
     }
-    if (i + z[i] > r) {
-      l = i;
-      r = i + z[i];
+    for(int i = 0; i<this->DnaSize; i++){
+      for(int j = 0; j<this->DnaSize; j++){
+        getMaxCommonPrefix[{this->Dna[i], this->Dna[j]}] = -1;
+        getMaxCommonSuffix[{this->Dna[i], this->Dna[j]}] = -1;
+      }
     }
   }
-  return z;
-}
-signed main(){
-  ios::sync_with_stdio(0);
-  cin.tie(0);
-  ifstream cin("bebra.txt");
-  ofstream cout("ans.txt");
-  ll n;
-  cin>>n;
-  vector<string>v(n);
-  for(ll i = 0; i<n; i++)cin>>v[i];
-  string global_answer = "";
-  ll sz_ga = inf;
-  //for(ll qq = 0; qq<5; qq++){
-    random_shuffle(v.begin(), v.end());
 
-    for(ll i = 0; i<n; i++){
-      for(ll j = 0; j<n; j++){
-        if(i == j)continue;
-        string s = v[i];
-        string t = v[j];
-        string tmp = t+"#"+s;
-        vector<ll>ans = z_function(tmp);
-        for(ll k = 0; k<(ll)ans.size(); k++){
-          if(ans[k] == (ll)t.size()){
-            v[j] = "";
-          }
+  vector<int>calc_z_function(string s){
+    int StringSize = s.size();
+    vector<int>z_function(StringSize, 0);
+
+    int left = 0;
+    int right = 0;
+
+    for(int i = 1; i<StringSize; i++){
+      if(i<=right){
+        z_function[i] = min(right-i, z_function[i-left]);
+      }
+      while(i+z_function[i]<StringSize && s[z_function[i]] == s[i+z_function[i]]){
+        z_function[i]++;
+      }
+      if(i+z_function[i]>right){
+        left = i;
+        right = i+z_function[i];
+      }
+    }
+    return z_function;
+  }
+
+  string buildDnaString(){
+    makeUnique();
+    findMaximumCommonPrefixSuffix();
+    Count();
+    string CompressedDna = "";
+    int MinCount = inf;
+    string StartDna = "";
+    for(int i = 0; i<this->DnaSize; i++){
+      if(this->countMaximum[this->Dna[i]]<MinCount){
+        MinCount = this->countMaximum[this->Dna[i]];
+        StartDna = this->Dna[i];
+      }
+    }
+
+    int lastMaximumPrefix = 0;
+    for(int i = 0; i<this->DnaSize; i++){
+      for(int j = lastMaximumPrefix; j<StartDna.size(); j++){
+        CompressedDna.push_back(StartDna[j]);
+      }
+      MatchUsed[StartDna] = true;
+      lastMaximumPrefix = 0;
+      string CurDna = "";
+      for(int j = 0; j<this->DnaSize; j++){
+        if(getMaxCommonPrefix[{this->Dna[j], StartDna}]>lastMaximumPrefix && MatchUsed[this->Dna[j]] == false){
+          lastMaximumPrefix = getMaxCommonPrefix[{this->Dna[j], StartDna}];
+          CurDna = this->Dna[j];
         }
       }
-    }
-    map<pair<string, string>, ll>mp1;
-    map<pair<string, string>, ll>mp2;
-    for(ll i = 0; i<n; i++){
-      for(ll j = 0; j<n; j++){
-        string s = v[i];
-        string t = v[j];
-        mp1[{s, t}] = -1;
-        mp2[{s, t}] = -1;
-        for(ll a = 0; a<min((ll)s.size(), (ll)t.size()); a++){
-          if(s.substr(0, a+1) == t.substr((ll)t.size()-a-1, (ll)t.size()+1)){
-            mp1[{s, t}] = a+1;
-          }
-          if(t.substr(0, a+1) == s.substr((ll)s.size()-a-1, (ll)s.size()+1)){
-            mp2[{s, t}] = a+1;
-          }
-        }
-      }
-    }
-    map<string, ll>cnt;
-    for(auto i:mp1){
-      cnt[i.first.first] += (i.second != -1);
-      cnt[i.first.second] += (i.second != -1);
-    }
-    for(auto i:mp2){
-      cnt[i.first.first] += (i.second != -1);
-      cnt[i.first.second] += (i.second != -1);
-    }
-    ll mn = inf;
-    string start = "";
-    for(ll i = 0; i<n; i++){
-      if(cnt[v[i]]<mn){
-        start = v[i];
-        mn = cnt[v[i]];
-      }
-    }
-    map<string, bool>used;
-    for(auto i:v)used[i] = false;
-    ll mx = 0;
-    string cur_answer = "";
-    for(ll i = 0; i<n; i++){
-      //cout<<mx<<" ";
-      //cout<<start<<"\n";
-      for(ll j = mx; j<(ll)start.size(); j++)cur_answer.push_back(start[j]);
-      used[start] = true;
-      string a = "";
-      mx = 0;
-      for(ll j = 0; j<n; j++){
-        if(mp1[{v[j], start}]>mx && !used[v[j]]){
-          mx = mp1[{v[j], start}];
-          a = v[j];
-        }
-      }
-      if(a == ""){
-        for(ll j = 0; j<n; j++){
-          if(!used[v[j]]){
-            a = v[j];
+      if(CurDna.size() == 0){
+        for(int j = 0; j<this->DnaSize; j++){
+          if(MatchUsed[this->Dna[j]] == false){
+            CurDna = this->Dna[j];
             break;
           }
         }
       }
-      start = a;
+      StartDna = CurDna;
     }
-    if((ll)cur_answer.size()<sz_ga){
-      global_answer = cur_answer;
-      sz_ga = (ll)cur_answer.size();
+    return CompressedDna;
+  }
+
+private:
+  vector<string>Dna;
+  int DnaSize;
+  map<pair<string, string>, int>getMaxCommonPrefix;
+  map<pair<string, string>, int>getMaxCommonSuffix;
+  map<string, bool>MatchUsed;
+  map<string, int>countMaximum;
+  void makeUnique(){
+    for(int i = 0; i<this->DnaSize; i++){
+      for(int j = 0; j<this->DnaSize; j++){
+        if(i == j){
+          continue;
+        }
+        string temp = this->Dna[j]+"#"+this->Dna[i];
+        vector<int>z_function = calc_z_function(temp);
+
+        for(int k = 0; k<z_function.size(); k++){
+          if(z_function[k] == this->Dna[j].size()){
+            this->Dna[j] = "";
+          }
+        }
+      }
     }
-  //}
-  cout<<global_answer<<"\n";
+  }
+  void findMaximumCommonPrefixSuffix(){
+    for(int i = 0; i<this->DnaSize; i++){
+      for(int j = 0; j<this->DnaSize; j++){
+        for(int a = 0; a<min(this->Dna[i].size(), this->Dna[j].size()); a++){
+          if(this->Dna[i].substr(0, a+1) == this->Dna[j].substr(this->Dna[j].size()-a-1, this->Dna[j].size()+1)){
+            getMaxCommonPrefix[{this->Dna[i], this->Dna[j]}] = a+1;
+          }
+          if(this->Dna[j].substr(0, a+1) == this->Dna[i].substr(this->Dna[i].size()-a-1, this->Dna[i].size()+1)){
+            getMaxCommonSuffix[{this->Dna[i], this->Dna[j]}] = a+1;
+          }
+        }
+      }
+    }
+  }
+  void Count(){
+    for(auto [genom, prefix]:getMaxCommonPrefix){
+      countMaximum[genom.first] += (prefix != -1);
+      countMaximum[genom.second] += (prefix != -1);
+    }
+    for(auto [genom, prefix]:getMaxCommonSuffix){
+      countMaximum[genom.first] += (prefix != -1);
+      countMaximum[genom.second] += (prefix != -1);
+    }
+  }
+
+};
+signed main() {
+  ios::sync_with_stdio(0);
+  cin.tie(0);
+  int n;
+  cin>>n;
+
+  vector<string>Dna(n);
+  for(int i = 0; i<n; i++){
+    cin>>Dna[i];
+  }
+
+  CompressDna compressed(Dna, n);
+  cout<<compressed.buildDnaString()<<"\n";
   return 0;
 }
