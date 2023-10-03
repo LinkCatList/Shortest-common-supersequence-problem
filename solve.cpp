@@ -1,25 +1,5 @@
-// #pragma GCC optimize("O3")
-// #pragma GCC target("avx2")
 #include <bits/stdc++.h>
-// #include <x86intrin.h>
-// #include <ext/pb_ds/assoc_container.hpp>
-// #include <ext/pb_ds/t_policy.hpp>
-using namespace std;
-// using namespace __gnu_pbds;
-// template <typename type, typename cmp = less<type>>
-// using pbds_set = t<type, null_type, cmp, rb_t_tag,
-// t_order_statistics_node_update>;
-typedef long long ll;
-typedef long double ld;
-typedef unsigned long long ull;
-// (づ°ω°)づﾐe★゜・。。・゜゜・。。・゜☆゜・。。・゜゜・。。・゜
-const ll K = 460;
 const ll inf = 2e9;
-const ll big_num = 2e18;
-string abc = "abcdefghijklmnopqrstuvwxyz";
-const ll LG = 31;
-const int mod = 1e9 + 7;
-// mt19937 rnd(std::chrono::steady_clock::now().time_since_epoch().count());
 
 class CompressDna{
 public:
