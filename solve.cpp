@@ -125,16 +125,38 @@ public:
           }
         }
       }
+      //cout<<FirstGood<<" "<<SecondGood<<" "<<MaximumOverlap<<"\n";
       NonDelete.erase(FirstGood);
       NonDelete.erase(SecondGood);
       string AddString = "";
-      for(int i = 0; i<FirstGood.size()-MaximumOverlap; i++){
-        AddString.push_back(FirstGood[i]);
+      //--------------debug
+      string Debug1 = "";
+      string Debug2 = "";
+      for(int i = FirstGood.size()-MaximumOverlap; i<FirstGood.size();i++){
+        Debug1.push_back(FirstGood[i]);
       }
-      for(int i = 0; i<SecondGood.size(); i++){
-        AddString.push_back(SecondGood[i]);
+      for(int i = 0; i<MaximumOverlap; i++){
+        Debug2.push_back(SecondGood[i]);
+      }
+      //--------------debug
+      if(Debug1 == Debug2){
+        for(int i = 0; i<FirstGood.size()-MaximumOverlap; i++){
+          AddString.push_back(FirstGood[i]);
+        }
+        for(int i = 0; i<SecondGood.size(); i++){
+          AddString.push_back(SecondGood[i]);
+        }
+      }
+      else{
+        for(int i = 0; i<SecondGood.size()-MaximumOverlap; i++){
+          AddString.push_back(SecondGood[i]);
+        }
+        for(int i = 0; i<FirstGood.size(); i++){
+          AddString.push_back(FirstGood[i]);
+        }
       }
       NonDelete.insert(AddString);
+      //cout<<AddString<<"\n";
     }
     for(auto Get:NonDelete){
       CompressedDna = Get;
