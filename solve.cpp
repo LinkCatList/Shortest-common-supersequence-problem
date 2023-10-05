@@ -75,7 +75,7 @@ public:
     }
   }
 
-  vector<int>calc_z_function(string s){
+  vector<int>CalcZFunction(string s){
     int StringSize = s.size();
     vector<int>z_function(StringSize, 0);
 
@@ -108,29 +108,36 @@ public:
       }
     }
 
-    int lastMaximumPrefix = 0;
+    set<string>NonDelete;
     for(int i = 0; i<this->DnaSize; i++){
-      for(int j = lastMaximumPrefix; j<StartDna.size(); j++){
-        CompressedDna.push_back(StartDna[j]);
-      }
-      MatchUsed[StartDna] = true;
-      lastMaximumPrefix = 0;
-      string CurDna = "";
-      for(int j = 0; j<this->DnaSize; j++){
-        if(getMaxCommonPrefix[{this->Dna[j], StartDna}]>lastMaximumPrefix && MatchUsed[this->Dna[j]] == false){
-          lastMaximumPrefix = getMaxCommonPrefix[{this->Dna[j], StartDna}];
-          CurDna = this->Dna[j];
-        }
-      }
-      if(CurDna.size() == 0){
-        for(int j = 0; j<this->DnaSize; j++){
-          if(MatchUsed[this->Dna[j]] == false){
-            CurDna = this->Dna[j];
-            break;
+      NonDelete.insert(this->Dna[i]);
+    }
+    while(NonDelete.size() != 1){
+      string FirstGood = "", SecondGood = "";
+      int MaximumOverlap = 0;
+      for(auto FirstString:NonDelete){
+        for(auto SecondString:NonDelete){
+          if(FirstString == SecondString)continue;
+          if(this->getMaxCommonPrefix[{FirstString, SecondString}]>=MaximumOverlap){
+            MaximumOverlap = this->getMaxCommonPrefix[{FirstString, SecondString}];
+            FirstGood = FirstString;
+            SecondGood = SecondString;
           }
         }
       }
-      StartDna = CurDna;
+      NonDelete.erase(FirstGood);
+      NonDelete.erase(SecondGood);
+      string AddString = "";
+      for(int i = 0; i<=FirstGood.size()-MaximumOverlap; i++){
+        AddString.push_back(FirstGood[i]);
+      }
+      for(int i = MaximumOverlap; i<SecondGood.size(); i++){
+        AddString.push_back(SecondGood[i]);
+      }
+      NonDelete.insert(AddString);
+    }
+    for(auto Get:NonDelete){
+      CompressedDna = Get;
     }
     return CompressedDna;
   }
@@ -163,7 +170,7 @@ private:
           continue;
         }
         string temp = this->Dna[j]+"#"+this->Dna[i];
-        vector<int>z_function = calc_z_function(temp);
+        vector<int>z_function = CalcZFunction(temp);
 
         for(int k = 0; k<z_function.size(); k++){
           if(z_function[k] == this->Dna[j].size()){
