@@ -128,10 +128,10 @@ public:
       NonDelete.erase(FirstGood);
       NonDelete.erase(SecondGood);
       string AddString = "";
-      for(int i = 0; i<=FirstGood.size()-MaximumOverlap; i++){
+      for(int i = 0; i<FirstGood.size()-MaximumOverlap; i++){
         AddString.push_back(FirstGood[i]);
       }
-      for(int i = MaximumOverlap; i<SecondGood.size(); i++){
+      for(int i = 0; i<SecondGood.size(); i++){
         AddString.push_back(SecondGood[i]);
       }
       NonDelete.insert(AddString);
