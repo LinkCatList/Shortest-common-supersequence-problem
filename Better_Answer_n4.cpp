@@ -97,7 +97,7 @@ public:
   }
 
   string buildDnaString(){
-    cout<<"OK\n";
+    //cout<<"OK\n";
     string CompressedDna = "";
     int MinCount = inf;
     string StartDna = "";
